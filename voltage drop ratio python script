@@ -1,0 +1,48 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Constants (assumes double-layer capacitance, C_dl = 10 uF/cm^2
+e = 1.602176634e-19        # Coulombs
+hbar = 1.0545718e-34       # J·s
+vf = 1e6                   # m/s
+kB = 1.380649e-23          # J/K
+T = 300                    # Kelvin
+
+# Range of Ef values in eV
+Vf_range = np.arange(-0.5, 0.0001, 0.002)   # Include 0
+
+# Pre-factor coefficient [F/m^2]
+coeff = 2 * kB * T * e**2 / (np.pi * (hbar * vf)**2)
+
+# E0 values to plot [in eV]
+E0_list = [-0.35, -0.30, -0.25, -0.20, -0.15, -0.10, -0.05, -0.001]
+
+# Colors: Matplotlib default color cycle (or use plt.cm.viridis or plt.cm.tab10)
+colors = plt.cm.tab10(np.linspace(0, 1, len(E0_list)))
+
+# Preallocate data matrix (first col = Vf_range, next = Vq/Vapp for each E0)
+data_matrix = np.zeros((len(Vf_range), len(E0_list) + 1))
+data_matrix[:, 0] = Vf_range
+
+plt.figure(figsize=(8, 6))
+
+for j, E0 in enumerate(E0_list):
+    Cq = coeff * np.log(2 * (1 + np.cosh((Vf_range + E0) * e / (kB * T))))
+    VqVapp_ratio = 1. / (1. + 10 * np.abs(Cq))
+    plt.plot(Vf_range, VqVapp_ratio, linewidth=2, color=colors[j], label=f'E₀ = {E0:.2f} eV')
+    data_matrix[:, j+1] = VqVapp_ratio
+
+plt.xlabel(r'$V_{\mathrm{app}}$ (vs Ag/AgCl, V)')
+plt.ylabel(r'$V_q / V_{\mathrm{app}}$')
+plt.legend(loc='lower right')
+plt.grid(False)
+plt.tight_layout()
+plt.show()
+
+# Creating column headers
+colNames = ['Vapp'] + [f'VqVapp_E0_{E0:.3f}' for E0 in E0_list]
+
+# Create pandas DataFrame and save as Excel
+T_out = pd.DataFrame(data_matrix, columns=colNames)
+T_out.to_excel('VqVapp_vs_Vapp.xlsx', index=False)
