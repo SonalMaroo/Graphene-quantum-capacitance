@@ -1,18 +1,5 @@
-name: Python CI
+- name: Run quantum capacitance
+  run: python quantum_capacitance.py
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-      - run: pip install pytest
-      - run: pytest -q || true
+- name: Run second script
+  run: python second_script.py
