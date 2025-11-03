@@ -1,5 +1,6 @@
-- name: Run quantum capacitance
-  run: python quantum_capacitance.py
-
-- name: Run second script
-  run: python second_script.py
+- name: Run all Python scripts
+  run: |
+    for file in *.py; do
+      echo "Running $file"
+      python "$file"
+    done
